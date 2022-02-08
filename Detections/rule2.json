@@ -1,0 +1,59 @@
+{
+    "contentVersion":  "1.0.0.0",
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources":  [
+        {
+            "id":  "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/bb735f37-3014-4dd9-9356-0c6ed8a05a5a')]",
+            "name":  "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/bb735f37-3014-4dd9-9356-0c6ed8a05a5a')]",
+            "type":  "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind":  "Scheduled",
+            "properties":  {
+                "incidentConfiguration":  {
+                    "createIncident":  true,
+                    "groupingConfiguration":  {
+                        "enabled":  false,
+                        "reopenClosedIncident":  false,
+                        "lookbackDuration":  "PT5M",
+                        "matchingMethod":  "AllEntities",
+                        "groupByEntities":  [
+                        ],
+                        "groupByAlertDetails":  null,
+                        "groupByCustomDetails":  null
+                    }
+                },
+                "entityMappings":  [
+                    {
+                        "entityType":  "AzureResource",
+                        "fieldMappings":  [
+                            {
+                                "identifier":  "ResourceId",
+                                "columnName":  "ResourceId"
+                            }
+                        ]
+                    }
+                ],
+                "queryFrequency":  "P1D",
+                "queryPeriod":  "P14D",
+                "triggerOperator":  "GreaterThan",
+                "triggerThreshold":  0,
+                "severity":  "Medium",
+                "query":  "let LastHeartbeatTime = Heartbeat\n| summarize LastHeartbeat_Time = arg_max(TimeGenerated, *) by ResourceId;\nHeartbeat\n| where TimeGenerated \u003e ago(14d)\n| summarize LastHeartbeat_Hours = datetime_diff(\"hour\",now(), max(TimeGenerated)) by ResourceId\n| where ResourceId \u003c\u003e \"\"\n| where ResourceId \u003c\u003e \"None\"\n| join kind=inner (LastHeartbeatTime) on ResourceId\n| where LastHeartbeat_Hours \u003e 24\n| project LastHeartbeat_Hours, LastHeartbeat_Time, Computer, ComputerIP, Category, OSType, OSName, ResourceId, SubscriptionId, ResourceGroup, RemoteIPCountry \n| sort by LastHeartbeat_Hours desc\n",
+                "suppressionDuration":  "PT1H",
+                "suppressionEnabled":  false,
+                "tactics":  [
+                    "Discovery"
+                ],
+                "displayName":  "(Preview)M2131_AssetStoppedLogging",
+                "enabled":  false,
+                "description":  "This alert is designed to monitor assets within the Maturity Model for Event Log Management (M-21-31) standard. The alert triggers when a monitored asset fails to provide a heartbeat within 24 hours.",
+                "alertRuleTemplateName":  null
+            },
+            "apiVersion":  "2021-09-01-preview"
+        }
+    ],
+    "parameters":  {
+        "workspace":  {
+            "type":  "String"
+        }
+    }
+}
