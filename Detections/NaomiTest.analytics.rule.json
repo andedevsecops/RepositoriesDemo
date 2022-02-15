@@ -1,0 +1,68 @@
+{
+    "contentVersion":  "1.0.0.0",
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources":  [
+        {
+            "id":  "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/385993f8-2a73-42de-946f-e643767e3136')]",
+            "name":  "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/385993f8-2a73-42de-946f-e643767e3136')]",
+            "type":  "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind":  "Scheduled",
+            "properties":  {
+                "incidentConfiguration":  {
+                    "createIncident":  true,
+                    "groupingConfiguration":  {
+                        "enabled":  false,
+                        "reopenClosedIncident":  false,
+                        "lookbackDuration":  "PT5M",
+                        "matchingMethod":  "AllEntities",
+                        "groupByEntities":  [
+                        ],
+                        "groupByAlertDetails":  [
+                        ],
+                        "groupByCustomDetails":  [
+                        ]
+                    }
+                },
+                "customDetails":  {
+                    "Hostname":  "Computer"
+                },
+                "entityMappings":  [
+                    {
+                        "entityType":  "Host",
+                        "fieldMappings":  [
+                            {
+                                "identifier":  "HostName",
+                                "columnName":  "Computer"
+                            }
+                        ]
+                    }
+                ],
+                "queryFrequency":  "PT5H",
+                "queryPeriod":  "PT5H",
+                "triggerOperator":  "GreaterThan",
+                "triggerThreshold":  0,
+                "eventGroupingSettings":  {
+                    "aggregationKind":  "SingleAlert"
+                },
+                "severity":  "Medium",
+                "query":  "SecurityAlert | extend EntitiesDynamicArray=todynamic(Entities) | mv-expand EntitiesDynamicArray | extend Computer = EntitiesDynamicArray.HostName",
+                "suppressionDuration":  "PT5H",
+                "suppressionEnabled":  false,
+                "tactics":  [
+                    "Execution",
+                    "Persistence"
+                ],
+                "displayName":  "NaomiTest",
+                "enabled":  false,
+                "description":  "Test for powershell custom entities",
+                "alertRuleTemplateName":  null
+            },
+            "apiVersion":  "2021-09-01-preview"
+        }
+    ],
+    "parameters":  {
+        "workspace":  {
+            "type":  "String"
+        }
+    }
+}
