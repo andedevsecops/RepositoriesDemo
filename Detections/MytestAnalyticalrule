@@ -1,0 +1,48 @@
+{
+    "contentVersion":  "1.0.0.0",
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources":  [
+        {
+            "id":  "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/62d4e47e-27cd-4340-bf96-eccacba9c195')]",
+            "name":  "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/62d4e47e-27cd-4340-bf96-eccacba9c195')]",
+            "type":  "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind":  "Scheduled",
+            "properties":  {
+                "incidentConfiguration":  {
+                    "createIncident":  true,
+                    "groupingConfiguration":  {
+                        "enabled":  false,
+                        "reopenClosedIncident":  false,
+                        "lookbackDuration":  "PT5M",
+                        "matchingMethod":  "AllEntities",
+                        "groupByEntities":  [
+                        ],
+                        "groupByAlertDetails":  null,
+                        "groupByCustomDetails":  null
+                    }
+                },
+                "queryFrequency":  "P1D",
+                "queryPeriod":  "P14D",
+                "triggerOperator":  "GreaterThan",
+                "triggerThreshold":  0,
+                "severity":  "Low",
+                "query":  "let baseline_time = 14d;\nlet detection_time = 1h;\nDynamics365Activity\n| where TimeGenerated between(ago(baseline_time)..ago(detection_time))\n| where UserType =~ 'admin'\n| extend Message = tostring(split(OriginalObjectId, ' ')[0])\n| summarize by UserId\n| join kind=rightanti\n(Dynamics365Activity\n| where TimeGenerated \u003e ago(detection_time)\n| where UserType =~ 'admin')\non UserId\n| summarize Actions = make_set(Message), MostRecentAction = max(TimeGenerated), IPs=make_set(ClientIP), UserAgents = make_set(UserAgent) by UserId\n| extend timestamp = MostRecentAction, AccountCustomEntity = UserId\n",
+                "suppressionDuration":  "PT1H",
+                "suppressionEnabled":  false,
+                "tactics":  [
+                    "InitialAccess"
+                ],
+                "displayName":  "New Dynamics 365 Admin Activity",
+                "enabled":  false,
+                "description":  "Detects users conducting administrative activity in Dynamics 365 where they have not had admin rights before.",
+                "alertRuleTemplateName":  null
+            },
+            "apiVersion":  "2021-09-01-preview"
+        }
+    ],
+    "parameters":  {
+        "workspace":  {
+            "type":  "String"
+        }
+    }
+}
