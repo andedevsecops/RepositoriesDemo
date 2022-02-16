@@ -1,0 +1,59 @@
+{
+    "contentVersion":  "1.0.0.0",
+    "$schema":  "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "resources":  [
+        {
+            "id":  "[concat(resourceId('Microsoft.OperationalInsights/workspaces/providers', parameters('workspace'), 'Microsoft.SecurityInsights'),'/alertRules/05259b04-cc16-4ba3-b076-a8785b1b8f1b')]",
+            "name":  "[concat(parameters('workspace'),'/Microsoft.SecurityInsights/05259b04-cc16-4ba3-b076-a8785b1b8f1b')]",
+            "type":  "Microsoft.OperationalInsights/workspaces/providers/alertRules",
+            "kind":  "Scheduled",
+            "properties":  {
+                "incidentConfiguration":  {
+                    "createIncident":  true,
+                    "groupingConfiguration":  {
+                        "enabled":  false,
+                        "reopenClosedIncident":  false,
+                        "lookbackDuration":  "PT5M",
+                        "matchingMethod":  "AllEntities",
+                        "groupByEntities":  [
+                        ],
+                        "groupByAlertDetails":  null,
+                        "groupByCustomDetails":  null
+                    }
+                },
+                "entityMappings":  [
+                    {
+                        "entityType":  "AzureResource",
+                        "fieldMappings":  [
+                            {
+                                "identifier":  "ResourceId",
+                                "columnName":  "ResourceId"
+                            }
+                        ]
+                    }
+                ],
+                "queryFrequency":  "P1D",
+                "queryPeriod":  "P14D",
+                "triggerOperator":  "GreaterThan",
+                "triggerThreshold":  0,
+                "severity":  "Medium",
+                "query":  "AzureActivity\n| where OperationNameValue contains \"Microsoft.SecurityInsights/dataConnectors/\"\n| where ActivityStatusValue == \"Succeeded\"\n| project OperationNameValue, Caller, CallerIpAddress, ActivityStatusValue, ActivitySubstatusValue, ResourceGroup, Properties, ResourceId, TimeGenerated\n| sort by TimeGenerated desc\n| extend Account = Caller\n",
+                "suppressionDuration":  "PT1H",
+                "suppressionEnabled":  false,
+                "tactics":  [
+                    "Discovery"
+                ],
+                "displayName":  "(Preview)M2131_DataConnectorAddedChangedRemoved",
+                "enabled":  false,
+                "description":  "This alert is designed to monitor data connector configurations. This alert is triggered when a data connector is added, updated, or deleted.",
+                "alertRuleTemplateName":  null
+            },
+            "apiVersion":  "2021-09-01-preview"
+        }
+    ],
+    "parameters":  {
+        "workspace":  {
+            "type":  "String"
+        }
+    }
+}
